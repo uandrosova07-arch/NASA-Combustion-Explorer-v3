@@ -1,7 +1,23 @@
 # NASA Combustion Explorer
 
+This is the sumbission for Nasa Space Apps Challange "Flame in Freefall: SI-Powered Fire Safety Insights from Microgravity Combustion Data", team lmsiki. 
 MVP repository for SPLADE-powered retrieval over NASA Physical Sciences
 Informatics (PSI) combustion investigations.
+Our solution uses a trained SPLADE neural sparse retrieval model to make NASA PSI combustion investigations and experimental runs searchable, comparable, and easier to interpret for spacecraft fire-safety research. 
+The main technical contribution of the project is the use of a trained SPLADE neural sparse retrieval model for scientific search.
+
+SPLADE combines advantages of lexical and neural retrieval. It produces sparse vocabulary-based representations while also expanding queries and documents toward semantically related concepts.
+
+For example, if a user types in:
+
+"cool flames"
+
+The model can retrieve investigations and experimental runs involving low-temperature combustion even when the exact wording differs across NASA records.
+
+Because the representation remains sparse, the system also provides a degree of interpretability as the users can inspect the vocabulary dimensions activated by a query in the SPLADE Explorer. It also serves as a way to show the transparency of our model and how the searches work, this was users can understand what words are better to use in order to get the most relevant data. 
+
+
+## But how does it work? 
 
 ## Current status
 
@@ -10,62 +26,8 @@ This snapshot is built from the supplied draft `investigations.csv`.
 - Source CSV rows: **34**
 - PSI investigations included in the retrieval corpus: **24**
 - Generated investigation-level chunks: **97**
-- BM25: **not included by design**
 
-The main retrieval corpus currently includes only rows that:
 
-1. have a non-empty `psi_id`;
-2. have `row_role` equal to `flight_investigation` or `ground_investigation`;
-3. have `in_psi_search == yes`.
-
-`context_not_in_psi_search` and `exclude_non_combustion` rows remain in the
-source CSV but are not indexed.
-
-## Repository
-
-```text
-NASA-Combustion-Explorer/
-├── README.md
-├── requirements.txt
-├── Dockerfile
-├── .gitignore
-├── .streamlit/
-│   └── config.toml
-├── config/
-│   └── splade.example.yaml
-├── data/
-│   ├── raw/
-│   │   └── investigations.csv
-│   ├── processed/
-│   │   ├── chunks.jsonl
-│   │   └── chunk_stats.json
-│   └── indexes/
-│       └── splade/
-├── models/
-│   └── README.md
-├── src/
-│   ├── data/
-│   │   ├── build_chunks.py
-│   │   └── validate.py
-│   ├── retrieval/
-│   │   ├── splade_encoder.py
-│   │   ├── splade_index.py
-│   │   ├── search.py
-│   │   └── aggregation.py
-│   └── evaluation/
-├── scripts/
-│   ├── build_chunks.py
-│   ├── validate_data.py
-│   └── build_splade_index.py
-├── dashboard/
-│   ├── app.py
-│   └── pages/
-│       ├── 1_Search.py
-│       ├── 2_Investigations.py
-│       └── 3_SPLADE_Explorer.py
-└── tests/
-    └── test_chunks.py
-```
 
 ## Build chunks
 
@@ -94,22 +56,6 @@ Each investigation can generate up to five semantic documents:
 - `evidence`
 - `impacts`
 
-Every JSONL record contains at least:
-
-```json
-{
-  "chunk_id": "PSI-69__experiment",
-  "psi_id": "PSI-69",
-  "run_id": null,
-  "chunk_type": "experiment",
-  "text": "...",
-  "source_fields": ["fuel_samples", "hardware_facility", "test_conditions"],
-  "metadata": { "...": "..." }
-}
-```
-
-The text is generated only from source CSV fields. Missing values are skipped;
-the script does not synthesize experimental facts.
 
 ## Run the current dashboard
 
@@ -172,26 +118,8 @@ For this checkpoint:
 - CPU is supported by default;
 - CUDA can be selected with `Splade(device="cuda")`.
 
-### 1. Copy the complete model package
 
-```text
-models/splade/
-├── splade.py
-├── model.pt
-├── config.json
-├── tokenizer.json
-├── tokenizer_config.json
-├── special_tokens_map.json
-└── vocab.txt
-```
-
-Do not commit `model.pt` to Git unless you intentionally use Git LFS or another
-model storage strategy.
-
-If the model package includes its own `requirements.txt`, install those exact
-dependencies too, because they are part of the original trained-model runtime.
-
-### 2. Smoke-test the model on CPU
+### Smoke-test the model on CPU
 
 ```bash
 python scripts/check_splade_model.py --device cpu
@@ -204,7 +132,7 @@ documents: (2, 30522)
 query:     (1, 30522)
 ```
 
-### 3. Build the document index once
+### Build the document index once
 
 ```bash
 python scripts/build_splade_index.py --device cpu
@@ -221,14 +149,14 @@ data/indexes/splade/
 
 The dashboard never re-encodes all documents during normal search.
 
-### 4. Test retrieval from the command line
+### Test retrieval from the command line
 
 ```bash
 python scripts/search_splade.py \
   "flame extinction with carbon dioxide in microgravity"
 ```
 
-### 5. Benchmark CPU query latency on your laptop
+### Benchmark CPU query latency on your laptop
 
 ```bash
 python scripts/benchmark_splade.py --device cpu
@@ -236,7 +164,7 @@ python scripts/benchmark_splade.py --device cpu
 
 This benchmark matters more than guessing whether a GPU is required.
 
-### 6. Start Streamlit
+### Start Streamlit
 
 ```bash
 streamlit run dashboard/app.py
@@ -299,45 +227,6 @@ investigation/run ranking before evaluation.
 `files.csv` is intentionally **not** indexed by SPLADE. It is provenance and
 download/catalog metadata for the dashboard.
 
-### Why both `runs` and `test_matrix` exist
-
-`runs.csv` represents actual per-run/per-sample experimental records where PSI
-provides structured run tables. `test_matrix.csv` preserves planned matrices,
-test-day summaries, sessions, and data-item indexes when PSI does not expose the
-same per-run structure. They must not be silently merged as if they had the same
-semantic meaning.
-
-
----
-
-## Curated insights layer
-
-`data/raw/insights.csv` contains **71** evidence-linked insights.
-
-This file is deliberately **not encoded into the primary SPLADE index**.
-The primary retrieval system should rank NASA PSI investigation/run/test-matrix
-documents, not rank our own derived conclusions.
-
-Instead, insights are joined after retrieval by `psi_id` and can be displayed
-beneath a retrieved investigation with:
-
-- `statement`
-- `evidence_type`
-- `source_ref`
-- `source_url`
-- `confidence`
-- `caveat`
-
-Current snapshot:
-
-- high-confidence insights: **44**
-- medium-confidence insights: **27**
-- distinct linked PSI IDs: **23**
-
-This separation is important for scientific provenance: SPLADE answers
-"which source records are relevant?", while the insights layer answers
-"what curated interpretation is associated with those records, and how strong
-is its evidence?"
 
 ### Token-length audit
 
@@ -355,3 +244,4 @@ document index be built:
 python scripts/check_splade_model.py --device cpu
 python scripts/build_splade_index.py --device cpu
 ```
+
