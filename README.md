@@ -245,3 +245,6 @@ python scripts/check_splade_model.py --device cpu
 python scripts/build_splade_index.py --device cpu
 ```
 
+Super Intelligence tools, including ChatGPT, were used as development assistants during this project.
+
+Code: SI tools assisted with software architecture, Python and Streamlit implementation, data-validation scripts,  and deployment preparation. The final code was reviewed, tested, and executed by the project team.
