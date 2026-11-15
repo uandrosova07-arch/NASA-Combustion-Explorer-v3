@@ -1,0 +1,1 @@
+Copy splade.py, model.pt, config/tokenizer/vocab files here.

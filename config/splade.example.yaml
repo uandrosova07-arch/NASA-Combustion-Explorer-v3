@@ -1,0 +1,5 @@
+model_dir: models/splade
+device: cpu
+vocab_size: 30522
+max_tokens: 256
+document_batch_size: 8

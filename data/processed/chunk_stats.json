@@ -1,0 +1,23 @@
+{
+  "investigation_rows": 34,
+  "indexable_investigations": 24,
+  "investigation_chunks": 120,
+  "run_rows": 1862,
+  "run_chunks": 1862,
+  "test_matrix_rows": 135,
+  "test_matrix_chunks": 135,
+  "primary_chunks_total": 2117,
+  "publication_rows": 352,
+  "publication_chunks_optional": 352,
+  "file_metadata_rows": 316,
+  "file_metadata_indexed": false,
+  "primary_chunks_by_type": {
+    "run": 1862,
+    "test_matrix": 135,
+    "investigation_overview": 24,
+    "investigation_experiment": 24,
+    "investigation_objectives": 24,
+    "investigation_impacts": 24,
+    "investigation_evidence": 24
+  }
+}
