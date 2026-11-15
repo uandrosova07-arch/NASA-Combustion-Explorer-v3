@@ -42,8 +42,8 @@ c2.metric("Current chunks", len(chunks))
 c3.metric("Source CSV rows", len(investigations))
 
 st.info(
-    "The data/chunk pipeline is active. SPLADE search will be enabled after "
-    "the trained checkpoint format and pooling are connected."
+      "The data/chunk pipeline is active. SPLADE search will be enabled after "
+    "the trained checkpoint format and pooling are connected. It can take some time! "
 )
 
 st.subheader("Current retrieval corpus")
